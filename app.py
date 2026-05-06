@@ -126,8 +126,8 @@ def predict(image):
 
 
 examples = [
-    ["examples/example1.png"],
-    ["examples/example2.png"]
+    ["examples/example1.jpg"],
+    ["examples/example2.jpg"]
 ]
 
 
