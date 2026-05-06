@@ -120,49 +120,51 @@ with gr.Blocks(
         """
         # Brain Tumor Segmentation
 
-        Upload a brain MRI image and the model will automatically segment tumor regions.
-
-        ### Model
-        - UNet
-        - EfficientNet-B4 Encoder
-        - PyTorch
-        - Gradio
+        UNet + EfficientNet-B4 for MRI tumor segmentation.
         """
-    )
-
-    gr.Markdown(
-        "## Example MRI Images"
-    )
-
-    input_image = gr.Image(
-        type="pil",
-        label="Upload MRI Image",
-        height=400
-    )
-
-    gr.Examples(
-        examples=examples,
-        inputs=input_image
-    )
-
-    predict_btn = gr.Button(
-        "Predict Segmentation",
-        variant="primary"
     )
 
     with gr.Row():
 
-        overlay_output = gr.Image(
-            type="numpy",
-            label="Tumor Overlay",
-            height=400
-        )
+        with gr.Column(scale=1):
 
-        mask_output = gr.Image(
-            type="numpy",
-            label="Predicted Mask",
-            height=400
-        )
+            input_image = gr.Image(
+                type="pil",
+                label="MRI Image",
+                height=300
+            )
+
+            gr.Examples(
+                examples=examples,
+                inputs=input_image
+            )
+
+            predict_btn = gr.Button(
+                "Predict",
+                variant="primary"
+            )
+
+        with gr.Column(scale=1):
+
+            overlay_output = gr.Image(
+                type="numpy",
+                label="Overlay",
+                height=300
+            )
+
+        with gr.Column(scale=1):
+
+            mask_output = gr.Image(
+                type="numpy",
+                label="Mask",
+                height=300
+            )
+
+    gr.Markdown(
+        """
+        Red regions indicate predicted tumor areas.
+        """
+    )
 
     predict_btn.click(
         fn=predict,
@@ -171,16 +173,6 @@ with gr.Blocks(
             overlay_output,
             mask_output
         ]
-    )
-
-    gr.Markdown(
-        """
-        ---
-        ### Notes
-
-        - Red regions indicate predicted tumor areas.
-        - Predictions are generated using a deep learning segmentation model.
-        """
     )
 
 demo.queue()
