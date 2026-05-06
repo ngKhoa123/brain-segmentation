@@ -7,8 +7,6 @@ import segmentation_models_pytorch as smp
 from albumentations.pytorch import ToTensorV2
 import albumentations as A
 
-
-
 IMG_SIZE = 256
 BEST_TH = 0.3
 
@@ -17,8 +15,6 @@ DEVICE = (
     if torch.cuda.is_available()
     else "cpu"
 )
-
-
 
 model = smp.Unet(
     encoder_name="timm-efficientnet-b4",
@@ -37,7 +33,6 @@ model.load_state_dict(
 model.to(DEVICE)
 model.eval()
 
-
 transform = A.Compose([
 
     A.Resize(
@@ -54,23 +49,16 @@ transform = A.Compose([
 
 ])
 
-
 def predict(image):
 
     if image is None:
         return None, None
 
-
-
     image = np.array(image)
-
-
 
     orig = image.copy()
 
     h, w = orig.shape[:2]
-
-
 
     aug = transform(image=image)
 
@@ -78,20 +66,15 @@ def predict(image):
 
     x = x.unsqueeze(0).to(DEVICE)
 
-
-
     with torch.no_grad():
 
         pred = torch.sigmoid(
             model(x)
         )[0,0].cpu().numpy()
 
-
-
     mask = (
         pred > BEST_TH
     ).astype(np.uint8)
-
 
     mask = cv2.resize(
         mask,
@@ -99,14 +82,9 @@ def predict(image):
         interpolation=cv2.INTER_NEAREST
     )
 
-
-
     color_mask = np.zeros_like(orig)
 
-
     color_mask[mask == 1] = [255, 0, 0]
-
-
 
     overlay = cv2.addWeighted(
         orig,
@@ -116,29 +94,22 @@ def predict(image):
         0
     )
 
-
     mask_vis = (
         mask * 255
     ).astype(np.uint8)
 
     return overlay, mask_vis
 
-
-
 examples = [
     ["examples/example1.jpg"],
     ["examples/example2.jpg"]
 ]
-
-
 
 theme = gr.themes.Soft(
     primary_hue="blue",
     secondary_hue="slate",
     neutral_hue="gray"
 )
-
-
 
 with gr.Blocks(
     theme=theme,
@@ -159,43 +130,39 @@ with gr.Blocks(
         """
     )
 
-    with gr.Row():
+    gr.Markdown(
+        "## Example MRI Images"
+    )
 
-
-        with gr.Column():
-
-            input_image = gr.Image(
-                type="pil",
-                label="Upload MRI Image",
-                height=400
-            )
-
-            predict_btn = gr.Button(
-                "Predict Segmentation",
-                variant="primary"
-            )
-
-        with gr.Column():
-
-            overlay_output = gr.Image(
-                type="numpy",
-                label="Tumor Overlay",
-                height=400
-            )
-
-            mask_output = gr.Image(
-                type="numpy",
-                label="Predicted Mask",
-                height=400
-            )
-
-
+    input_image = gr.Image(
+        type="pil",
+        label="Upload MRI Image",
+        height=400
+    )
 
     gr.Examples(
         examples=examples,
         inputs=input_image
     )
 
+    predict_btn = gr.Button(
+        "Predict Segmentation",
+        variant="primary"
+    )
+
+    with gr.Row():
+
+        overlay_output = gr.Image(
+            type="numpy",
+            label="Tumor Overlay",
+            height=400
+        )
+
+        mask_output = gr.Image(
+            type="numpy",
+            label="Predicted Mask",
+            height=400
+        )
 
     predict_btn.click(
         fn=predict,
@@ -206,7 +173,6 @@ with gr.Blocks(
         ]
     )
 
-
     gr.Markdown(
         """
         ---
@@ -216,10 +182,6 @@ with gr.Blocks(
         - Predictions are generated using a deep learning segmentation model.
         """
     )
-
-# =========================================================
-# LAUNCH
-# =========================================================
 
 demo.queue()
 
